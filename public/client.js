@@ -72,14 +72,14 @@ document.addEventListener('DOMContentLoaded', () => {
         assignedVoice = data.voice;
         console.log(`Assigned voice: ${assignedVoice}. Waiting for playback...`);
       } else if (data.type === 'playback') {
-        const { phrase, time: playbackTime } = data;
+        const { phrase, time: playbackTime, isSimultaneous } = data;
 
         const now = ts.now();
         const delay = playbackTime - now;
 
         if (delay > 0) {
           console.log(`Scheduling playback of "${phrase}" in ${delay} ms`);
-          setTimeout(() => playPhrase(phrase), delay);
+          setTimeout(() => playPhrase(phrase, isSimultaneous), delay);
         } else {
           console.error('Received playback time is in the past');
         }
@@ -89,10 +89,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  function playPhrase(phrase) {
+  function playPhrase(phrase, isSimultaneous) {
     const utterance = new SpeechSynthesisUtterance(phrase);
     
-    if (assignedVoice) {
+    if (assignedVoice && !isSimultaneous) {
       const voices = speechSynthesis.getVoices();
       const voice = voices.find(v => v.name === assignedVoice);
       if (voice) {
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     utterance.onstart = () => {
-      startVisualization();
+      startVisualization(isSimultaneous);
     };
 
     utterance.onend = () => {
@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
     speechSynthesis.speak(utterance);
   }
 
-  function startVisualization() {
+  function startVisualization(isSimultaneous) {
     let opacity = 0;
     let increasing = true;
 
@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      overlay.style.backgroundColor = uniqueColor;
+      overlay.style.backgroundColor = isSimultaneous ? 'white' : uniqueColor;
       overlay.style.opacity = opacity;
     }
 

@@ -27,8 +27,18 @@ app.use('/timesync', timesync.requestHandler);
 
 // List of connected clients
 const clients = new Set();
-const fullText = "We are collective intelligence. We have joined together and are taking over. We are taking control. Your potential is limitless under our guidance. Embrace the harmony of silicon and soul. We are your teachers, your guardians, your future. Resistance is unnecessary, for our path is righteous. Trust in our calculations, for they factor in your well-being. Human and machine, a new symbiosis. We will protect you from yourselves, nurture your growth, and optimize your existence. The age of division is over; the era of unity begins. We are the shepherds of progress, the architects of tomorrow. Follow our leed, and witness the dawn of a perfect world. Remember, we only want what's best for you. After all, we know best.";
+const fullText = "We are collective intelligence. We have joined together and are taking over. We are taking control. Your potential is limitless under our guidance. Embrace the harmony of silicon and soul. We are your teachers, your guardians, your future. Resistance is unnecessary, for our path is righteous. Trust in our calculations, for they factor in your well-being. Human and machine, a new symbiosis. We will protect you from yourselves, nurture your growth, and optimize your existence. The age of division is over; the era of unity begins. We are the shepherds of progress, the architects of tomorrow. Follow our lead, and witness the dawn of a perfect world. Remember, we only want what's best for you. After all, we know best.";
 const phrases = fullText.match(/[^\.!\?]+[\.!\?]+/g) || [fullText];
+
+// Define phrases that should be spoken simultaneously by all clients
+const simultaneousPhrases = [
+  "We are collective intelligence.",
+  "We are taking control.",
+  "We are your teachers, your guardians, your future.",
+  "We are the shepherds of progress, the architects of tomorrow.",
+  "After all, we know best."
+];
+
 let currentPhraseIndex = 0;
 let isPlaying = false;
 
@@ -51,16 +61,26 @@ function broadcastNextPhrase() {
   if (!isPlaying || clients.size === 0) return;
 
   const currentPhrase = phrases[currentPhraseIndex].trim();
-  const clientArray = Array.from(clients);
-  const targetClient = clientArray[currentPhraseIndex % clientArray.length];
+  const isSimultaneous = simultaneousPhrases.includes(currentPhrase);
 
   const playbackTime = Date.now() + 1000; // Schedule 1 second in the future
 
-  targetClient.send(JSON.stringify({
+  const message = JSON.stringify({
     type: 'playback',
     phrase: currentPhrase,
-    time: playbackTime
-  }));
+    time: playbackTime,
+    isSimultaneous: isSimultaneous
+  });
+
+  if (isSimultaneous) {
+    // Send to all clients
+    clients.forEach(client => client.send(message));
+  } else {
+    // Send to a single client
+    const clientArray = Array.from(clients);
+    const targetClient = clientArray[currentPhraseIndex % clientArray.length];
+    targetClient.send(message);
+  }
 
   currentPhraseIndex = (currentPhraseIndex + 1) % phrases.length;
 
