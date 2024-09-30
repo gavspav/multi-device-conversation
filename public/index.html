@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Synchronized Phrase Player</title>
+  <!-- Load timesync library locally -->
+  <script src="timesync.min.js"></script>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+    .container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 10;
+    }
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: black;
+      display: none;
+      z-index: 5;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="overlay"></div>
+  <div class="container">
+    <h1>Phrase Playback Client</h1>
+    <p>Please ensure your speakers are turned on. Click the button below to join the session and go fullscreen.</p>
+    <button id="joinButton">Join Session</button>
+    <p id="status"></p>
+  </div>
+  <!-- Load client.js after timesync -->
+  <script src="client.js"></script>
+</body>
+</html>
